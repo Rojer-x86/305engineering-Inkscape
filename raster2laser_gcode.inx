@@ -19,8 +19,8 @@
 	<param name="Description" type="description">created by 305 Engineering</param>
     
 	<!-- Opzioni di esportazione dell'immagine -->
-	<param name="directory" type="string"  gui-text="Export directory"></param>
-	<param name="filename" type="string"  gui-text="File Name"></param>
+	<param name="directory" type="string" gui-text="Export directory"></param>
+	<param name="filename" type="string" gui-text="File Name"></param>
 	<param name="add-numeric-suffix-to-filename" type="boolean" gui-text="Add numeric suffix to filename">true</param>
 		
 	<param name="bg_color" type="enum" gui-text="Replace transparency with">
@@ -70,10 +70,23 @@
 
 	
 	<!-- Velocità Nero e spostamento -->
-	<param name="speed_ON" type="int" min="1" max="5000" gui-text="Engraving speed">200</param>
+	<param name="speed_ON" type="int" min="1" max="10000" gui-text="Engraving speed">200</param>
+
+	<!-- Velocity move -->
+	<param name="speedMove" type="int" min="1" max="10000" gui-text="Move speed">3000</param>
+
 	
 	<!-- FLIP = coordinate Cartesiane (False) Coordinate "informatiche" (True) -->
 	<param name="flip_y" type="boolean" gui-text="Flip Y">false</param>
+
+	<!-- Coordinate is Offset-->
+	<param name="coordinateIsOffset" type="boolean" gui-text="Coordinate is relative">true</param>
+
+	<!-- If there is a Z axis -->
+	<param name="zOffset" type="float" gui-text="Z offset" max="250" precision="2">0</param>
+
+	<!-- Use gcode command G0 -->
+	<param name="useG0" type="boolean" gui-text="Use gcode command G0">true</param>
 
 	<!-- Homing -->
 	<param name="homing" type="enum" gui-text="Homing ?">
@@ -82,9 +95,10 @@
 		<_item value="3">No Homing</_item>
 	</param>
 	
-	<param name="laseron" type="string"  gui-text="Laser ON Command">M03</param>
-	<param name="laseroff" type="string"  gui-text="Laser OFF Command">M05</param>
-	
+	<param name="laseron" type="string" gui-text="Laser ON Command">M03</param>
+	<param name="laseroff" type="string" gui-text="Laser OFF Command">M05</param>
+	<param name="startGcode" type="string" gui-text="Start gcode"></param>
+	<param name="stopGcode" type="string" gui-text="Stop gcode"></param>
 	<!-- Anteprima = Solo immagine BN -->
 	<param name="preview_only" type="boolean" gui-text="Preview only">false</param>
 	<param name="p_only" type="description">If "Preview only" is true the gcode file will not be generated.</param>
