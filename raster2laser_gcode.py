@@ -37,6 +37,8 @@ import inkex
 import png
 import array
 
+import argparse
+from distutils.util import strtobool
 
 class GcodeExport(inkex.Effect):
 
@@ -46,51 +48,50 @@ class GcodeExport(inkex.Effect):
 		inkex.Effect.__init__(self)
 		
 		# Opzioni di esportazione dell'immagine
-		self.OptionParser.add_option("-d", "--directory",action="store", type="string", dest="directory", default="/home/",help="Directory for files") ####check_dir
-		self.OptionParser.add_option("-f", "--filename", action="store", type="string", dest="filename", default="-1.0", help="File name")            
-		self.OptionParser.add_option("","--add-numeric-suffix-to-filename", action="store", type="inkbool", dest="add_numeric_suffix_to_filename", default=True,help="Add numeric suffix to filename")            
-		self.OptionParser.add_option("","--bg_color",action="store",type="string",dest="bg_color",default="",help="")
-		self.OptionParser.add_option("","--resolution",action="store", type="int", dest="resolution", default="5",help="") #Usare il valore su float(xy)/resolution e un case per i DPI dell export
+		self.arg_parser.add_argument("-d", "--directory",action="store", type=str, dest="directory", default="/home/",help="Directory for files") ####check_dir
+		self.arg_parser.add_argument("-f", "--filename", action="store", type=str, dest="filename", default="-1.0", help="File name")
+		self.arg_parser.add_argument("--add-numeric-suffix-to-filename", action="store", type=lambda x:bool(strtobool(x)), dest="add_numeric_suffix_to_filename", nargs='?', const=False, default=True,help="Add numeric suffix to filename")
+		self.arg_parser.add_argument("--bg_color",action="store",type=str,dest="bg_color",default="",help="")
+		self.arg_parser.add_argument("--resolution",action="store", type=int, dest="resolution", default="5",help="") #Usare il valore su float(xy)/resolution e un case per i DPI dell export
 		
 		
 		# Come convertire in scala di grigi
-		self.OptionParser.add_option("","--grayscale_type",action="store", type="int", dest="grayscale_type", default="1",help="") 
+		self.arg_parser.add_argument("--grayscale_type",action="store", type=int, dest="grayscale_type", default="1",help="")
 		
 		# Modalita di conversione in Bianco e Nero 
-		self.OptionParser.add_option("","--conversion_type",action="store", type="int", dest="conversion_type", default="1",help="") 
+		self.arg_parser.add_argument("--conversion_type",action="store", type=int, dest="conversion_type", default="1",help="")
 		
 		# Opzioni modalita 
-		self.OptionParser.add_option("","--BW_threshold",action="store", type="int", dest="BW_threshold", default="128",help="") 
-		self.OptionParser.add_option("","--grayscale_resolution",action="store", type="int", dest="grayscale_resolution", default="1",help="") 
+		self.arg_parser.add_argument("--BW_threshold",action="store", type=int, dest="BW_threshold", default="128",help="")
+		self.arg_parser.add_argument("--grayscale_resolution",action="store", type=int, dest="grayscale_resolution", default="1",help="")
 		
 		#Velocita Nero e spostamento
-		self.OptionParser.add_option("","--speed_ON",action="store", type="int", dest="speed_ON", default="200",help="") 
+		self.arg_parser.add_argument("--speed_ON",action="store", type=int, dest="speed_ON", default="200",help="")
 
 		# Mirror Y
-		self.OptionParser.add_option("","--flip_y",action="store", type="inkbool", dest="flip_y", default=False,help="")
+		self.arg_parser.add_argument("--flip_y",action="store", type=lambda x:bool(strtobool(x)), dest="flip_y", nargs='?', const=True ,default=False,help="")
 		
 		# Homing
-		self.OptionParser.add_option("","--homing",action="store", type="int", dest="homing", default="1",help="")
+		self.arg_parser.add_argument("--homing",action="store", type=int, dest="homing", default="1",help="")
 
 		# Commands
-		self.OptionParser.add_option("","--laseron", action="store", type="string", dest="laseron", default="M03", help="")
-		self.OptionParser.add_option("","--laseroff", action="store", type="string", dest="laseroff", default="M05", help="")
+		self.arg_parser.add_argument("--laseron", action="store", type=str, dest="laseron", default="M03", help="")
+		self.arg_parser.add_argument("--laseroff", action="store", type=str, dest="laseroff", default="M05", help="")
 		
 		
 		# Anteprima = Solo immagine BN 
-		self.OptionParser.add_option("","--preview_only",action="store", type="inkbool", dest="preview_only", default=False,help="") 
+		self.arg_parser.add_argument("--preview_only",action="store", type=lambda x:bool(strtobool(x)), dest="preview_only", nargs='?', const=True, default=False,help="")
 
 		#inkex.errormsg("BLA BLA BLA Messaggio da visualizzare") #DEBUG
-
+		self.options = self.arg_parser.parse_args()
 
 		
 		
 ######## 	Richiamata da __init__()
 ########	Qui si svolge tutto
-	def effect(self):
-		
+	def run(self):
 
-		current_file = self.args[-1]
+		current_file = self.options.input_file
 		bg_color = self.options.bg_color
 		
 		
@@ -183,10 +184,10 @@ class GcodeExport(inkex.Effect):
 		else:
 			DPI = 254
 
-		command="inkscape -C -e \"%s\" -b\"%s\" %s -d %s" % (pos_file_png_exported,bg_color,current_file,DPI) #Comando da linea di comando per esportare in PNG
-					
-		p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		return_code = p.wait()
+		command="inkscape -C -o \"%s\" -b \"%s\" %s -d %s" % (pos_file_png_exported,bg_color,current_file,DPI) #Comando da linea di comando per esportare in PNG
+
+		p = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		return_code = p.returncode
 		f = p.stdout
 		err = p.stderr
 
@@ -556,7 +557,7 @@ class GcodeExport(inkex.Effect):
 
 def _main():
 	e=GcodeExport()
-	e.affect()
+	e.run()
 	
 	exit()
 
